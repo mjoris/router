@@ -1,6 +1,9 @@
 .DS_Store
 /composer.lock
 /vendor/
-tests-report/
+/tests-report/
 /.idea/
-.php_cs.cache
+/.vscode/
+/.php-cs-fixer.cache
+/.phpunit.cache/
+/.phpunit.result.cache

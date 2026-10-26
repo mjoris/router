@@ -1,6 +1,17 @@
-# Changelog for `bramus/router`
+# Changelog for `mjoris/router`
 
-## 1.next – ????.??.??
+`mjoris/router` is a fork of [`bramus/router`](https://github.com/bramus/router). Versions before 2.0 are releases of `bramus/router`.
+
+## 2.0.0 – 2026.10.26
+
+- Changed: Package renamed to `mjoris/router`, namespace `Bramus\Router` renamed to `Mjoris\Router` _(@mjoris)_
+- Changed: Requires PHP 8.0 or greater; typed properties, parameters and return types _(@mjoris)_
+- Changed: PSR-4 autoloading (`src/Router.php`) _(@mjoris)_
+- Added: An `\Error` is thrown when a `Controller@method` handler can't be found or called (instead of an empty page) _(@mjoris)_
+- Added: A warning is triggered when routes were defined but `run()` was never called _(@mjoris)_
+- Fixed: `Content-Type` and `Content-Length` headers in `getRequestHeaders()` when `getallheaders()` isn't available _(@mjoris)_
+- Removed: The unused `$match` parameter of `trigger404()` _(@mjoris)_
+- Dev: PHPUnit 9.6–11, PHPStan, PHP CS Fixer 3 (PER-CS), GitHub Actions on PHP 8.0–8.5 _(@mjoris)_
 
 ## 1.6.1 – 2021.11.19
 

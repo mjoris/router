@@ -1,9 +1,10 @@
-# bramus/router
+# mjoris/router
 
-[![Build Status](https://github.com/bramus/router/workflows/CI/badge.svg)](https://github.com/bramus/router/actions) [![Source](http://img.shields.io/badge/source-bramus/router-blue.svg?style=flat-square)](https://github.com/bramus/router) [![Version](https://img.shields.io/packagist/v/bramus/router.svg?style=flat-square)](https://packagist.org/packages/bramus/router) [![Downloads](https://img.shields.io/packagist/dt/bramus/router.svg?style=flat-square)](https://packagist.org/packages/bramus/router/stats) [![License](https://img.shields.io/packagist/l/bramus/router.svg?style=flat-square)](https://github.com/bramus/router/blob/master/LICENSE)
+[![CI](https://github.com/mjoris/router/actions/workflows/CI.yml/badge.svg)](https://github.com/mjoris/router/actions) [![Version](https://img.shields.io/packagist/v/mjoris/router.svg?style=flat-square)](https://packagist.org/packages/mjoris/router) [![PHP](https://img.shields.io/packagist/dependency-v/mjoris/router/php.svg?style=flat-square)](https://packagist.org/packages/mjoris/router) [![License](https://img.shields.io/packagist/l/mjoris/router.svg?style=flat-square)](LICENSE)
 
-A lightweight and simple object oriented PHP Router.
-Built by Bram(us) Van Damme _([https://www.bram.us](https://www.bram.us))_ and [Contributors](https://github.com/bramus/router/graphs/contributors)
+A lightweight and simple object oriented PHP Router — small enough to read and understand in one sitting.
+
+`mjoris/router` is a modernised PHP 8 fork of [bramus/router](https://github.com/bramus/router), built by Bram(us) Van Damme _([https://www.bram.us](https://www.bram.us))_ and [Contributors](https://github.com/bramus/router/graphs/contributors). The whole router is one class in one file ([`src/Router.php`](src/Router.php)), which makes it well suited for students who want to look under the hood.
 
 
 ## Features
@@ -15,20 +16,19 @@ Built by Bram(us) Van Damme _([https://www.bram.us](https://www.bram.us))_ and [
 - [Optional Route Subpatterns](#optional-route-subpatterns)
 - [Supports `X-HTTP-Method-Override` header](#overriding-the-request-method)
 - [Subrouting / Mounting Routes](#subrouting--mounting-routes)
-- [Allowance of `Class@Method` calls](#classmethod-calls)
+- [Allowance of `Class@Method` calls](#classmethod-calls), with [clear errors when a controller or method is missing](#errors-for-missing-controllers)
 - [Custom 404 handling](#custom-404)
 - [Before Route Middlewares](#before-route-middlewares)
 - [Before Router Middlewares / Before App Middlewares](#before-router-middlewares)
 - [After Router Middleware / After App Middleware (Finish Callback)](#after-router-middleware--run-callback)
+- [A warning when you forget to call `run()`](#forgetting-to-call-run)
 - [Works fine in subfolders](#subfolder-support)
-
 
 
 ## Prerequisites/Requirements
 
-- PHP 5.3 or greater
+- PHP 8.0 or greater
 - [URL Rewriting](https://gist.github.com/bramus/5332525)
-
 
 
 ## Installation
@@ -36,27 +36,27 @@ Built by Bram(us) Van Damme _([https://www.bram.us](https://www.bram.us))_ and [
 Installation is possible using Composer
 
 ```
-composer require bramus/router ~1.6
+composer require mjoris/router
 ```
-
 
 
 ## Demo
 
-A demo is included in the `demo` subfolder. Serve it using your favorite web server, or using PHP 5.4+'s built-in server by executing `php -S localhost:8080` on the shell. A `.htaccess` for use with Apache is included.
+A demo is included in the `demo` subfolder. Serve it using your favorite web server, or using PHP's built-in server by executing `php -S localhost:8080` in that folder. A `.htaccess` for use with Apache is included.
 
-Additionally a demo of a mutilingual router is also included. This can be found in the `demo-multilang` subfolder and can be ran in the same manner as the normal demo.
+Additionally a demo of a multilingual router is also included. This can be found in the `demo-multilang` subfolder and can be run in the same manner as the normal demo.
+
 
 ## Usage
 
-Create an instance of `\Bramus\Router\Router`, define some routes onto it, and run it.
+Create an instance of `\Mjoris\Router\Router`, define some routes onto it, and run it.
 
 ```php
 // Require composer autoloader
 require __DIR__ . '/vendor/autoload.php';
 
 // Create Router instance
-$router = new \Bramus\Router\Router();
+$router = new \Mjoris\Router\Router();
 
 // Define routes
 // ...
@@ -74,7 +74,7 @@ Hook __routes__ (a combination of one or more HTTP methods and a pattern) using 
 $router->match('GET|POST', 'pattern', function() { … });
 ```
 
-`bramus/router` supports `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD` _(see [note](#a-note-on-making-head-requests))_, and `OPTIONS` HTTP request methods. Pass in a single request method, or multiple request methods separated by `|`.
+`mjoris/router` supports `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD` _(see [note](#a-note-on-making-head-requests))_, and `OPTIONS` HTTP request methods. Pass in a single request method, or multiple request methods separated by `|`.
 
 When a route matches against the current URL (e.g. `$_SERVER['REQUEST_URI']`), the attached __route handling function__ will be executed. The route handling function must be a [callable](http://php.net/manual/en/language.types.callable.php). Only the first route matched will be handled. When no matching route is found, a 404 handler will be executed.
 
@@ -99,7 +99,7 @@ $router->all('pattern', function() { … });
 
 Note: Routes must be hooked before `$router->run();` is being called.
 
-Note: There is no shorthand for `match()` as `bramus/router` will internally re-route such requrests to their equivalent `GET` request, in order to comply with RFC2616 _(see [note](#a-note-on-making-head-requests))_.
+Note: There is no shorthand for `match()` as `mjoris/router` will internally re-route such requrests to their equivalent `GET` request, in order to comply with RFC2616 _(see [note](#a-note-on-making-head-requests))_.
 
 ### Route Patterns
 
@@ -278,6 +278,17 @@ $router->get('/users/(\d+)', 'User@showProfile');
 $router->get('/cars/(\d+)', 'Car@showProfile');
 ```
 
+#### Errors for missing controllers
+
+When the router can't call a `Class@Method` handler, it throws an `\Error` with a clear message instead of silently showing an empty page:
+
+- `Controller class '\App\Controllers\User' not found`
+- `Method 'showProfile' not found in controller class '\App\Controllers\User'`
+- `Method '\App\Controllers\User::showProfile' must be public and not abstract`
+- `Route handler 'foo' is not callable and is not of the form 'Controller@method'`
+
+These errors are thrown when the route is visited (not when it is defined), so only the routes that are actually used need to work.
+
 ### Custom 404
 
 The default 404 handler sets a 404 status code and exits. You can override this default 404 handler by using `$router->set404(callable);`
@@ -296,11 +307,10 @@ $router->set404('/api(/.*)?', function() {
     header('HTTP/1.1 404 Not Found');
     header('Content-Type: application/json');
 
-    $jsonArray = array();
-    $jsonArray['status'] = "404";
-    $jsonArray['status_text'] = "route not defined";
-
-    echo json_encode($jsonArray);
+    echo json_encode([
+        'status' => '404',
+        'status_text' => 'route not defined',
+    ]);
 });
 ```
 
@@ -328,7 +338,7 @@ $router->get('/([a-z0-9-]+)', function($id) use ($router) {
 
 ### Before Route Middlewares
 
-`bramus/router` supports __Before Route Middlewares__, which are executed before the route handling is processed.
+`mjoris/router` supports __Before Route Middlewares__, which are executed before the route handling is processed.
 
 Like route handling functions, you hook a handling function to a combination of one or more HTTP request methods and a specific route pattern.
 
@@ -366,6 +376,16 @@ $router->run(function() { … });
 Note: If the route handling function has `exit()`ed the run callback won't be run.
 
 
+### Forgetting to call `run()`
+
+Without `$router->run()` nothing happens and you just get an empty page. To help you spot this, the router triggers a PHP warning when the script ends while routes were defined but `run()` was never called:
+
+```
+Warning: Routes were defined, but the router was never started: did you forget to call $router->run()?
+```
+
+(This check lives in the `__destruct()` method of the router, which PHP calls when the router object is destroyed — at the latest when the script ends.)
+
 ### Overriding the request method
 
 Use `X-HTTP-Method-Override` to override the HTTP Request Method. Only works when the original Request Method is `POST`. Allowed values for `X-HTTP-Method-Override` are `PUT`, `DELETE`, or `PATCH`.
@@ -373,7 +393,7 @@ Use `X-HTTP-Method-Override` to override the HTTP Request Method. Only works whe
 
 ### Subfolder support
 
-Out-of-the box `bramus/router` will run in any (sub)folder you place it into … no adjustments to your code are needed. You can freely move your _entry script_ `index.php` around, and the router will automatically adapt itself to work relatively from the current folder's path by mounting all routes onto that __basePath__.
+Out-of-the box `mjoris/router` will run in any (sub)folder you place it into … no adjustments to your code are needed. You can freely move your _entry script_ `index.php` around, and the router will automatically adapt itself to work relatively from the current folder's path by mounting all routes onto that __basePath__.
 
 Say you have a server hosting the domain `www.example.org` using `public_html/` as its document root, with this little _entry script_ `index.php`:
 
@@ -382,13 +402,13 @@ $router->get('/', function() { echo 'Index'; });
 $router->get('/hello', function() { echo 'Hello!'; });
 ```
 
-- If your were to place this file _(along with its accompanying `.htaccess` file or the like)_ at the document root level (e.g. `public_html/index.php`), `bramus/router` will mount all routes onto the domain root (e.g. `/`) and thus respond to `https://www.example.org/` and `https://www.example.org/hello`.
+- If your were to place this file _(along with its accompanying `.htaccess` file or the like)_ at the document root level (e.g. `public_html/index.php`), `mjoris/router` will mount all routes onto the domain root (e.g. `/`) and thus respond to `https://www.example.org/` and `https://www.example.org/hello`.
 
-- If you were to move this file _(along with its accompanying `.htaccess` file or the like)_ into a subfolder (e.g. `public_html/demo/index.php`), `bramus/router` will mount all routes onto the current path (e.g. `/demo`) and thus repsond to `https://www.example.org/demo` and `https://www.example.org/demo/hello`. There's **no** need for `$router->mount(…)` in this case.
+- If you were to move this file _(along with its accompanying `.htaccess` file or the like)_ into a subfolder (e.g. `public_html/demo/index.php`), `mjoris/router` will mount all routes onto the current path (e.g. `/demo`) and thus repsond to `https://www.example.org/demo` and `https://www.example.org/demo/hello`. There's **no** need for `$router->mount(…)` in this case.
 
 #### Disabling subfolder support
 
-In case you **don't** want `bramus/router` to automatically adapt itself to the folder its being placed in, it's possible to manually override the _basePath_ by calling `setBasePath()`. This is necessary in the _(uncommon)_ situation where your _entry script_ and your _entry URLs_ are not tightly coupled _(e.g. when the entry script is placed into a subfolder that does not need be part of the URLs it responds to)_.
+In case you **don't** want `mjoris/router` to automatically adapt itself to the folder its being placed in, it's possible to manually override the _basePath_ by calling `setBasePath()`. This is necessary in the _(uncommon)_ situation where your _entry script_ and your _entry URLs_ are not tightly coupled _(e.g. when the entry script is placed into a subfolder that does not need be part of the URLs it responds to)_.
 
 ```php
 // Override auto base path detection
@@ -404,16 +424,16 @@ If you were to place this file into a subfolder (e.g. `public_html/some/sub/fold
 
 ## Integration with other libraries
 
-Integrate other libraries with `bramus/router` by making good use of the `use` keyword to pass dependencies into the handling functions.
+Integrate other libraries with `mjoris/router` by making good use of the `use` keyword to pass dependencies into the handling functions.
 
 ```php
 $tpl = new \Acme\Template\Template();
 
 $router->get('/', function() use ($tpl) {
     $tpl->load('home.tpl');
-    $tpl->setdata(array(
+    $tpl->setdata([
         'name' => 'Bramus!'
-    ));
+    ]);
 });
 
 $router->run(function() use ($tpl) {
@@ -432,7 +452,7 @@ There's no such thing as `$_PUT` in PHP. One must fake it:
 $router->put('/movies/(\d+)', function($id) {
 
     // Fake $_PUT
-    $_PUT  = array();
+    $_PUT = [];
     parse_str(file_get_contents('php://input'), $_PUT);
 
     // ...
@@ -447,26 +467,39 @@ When making `HEAD` requests all output will be buffered to prevent any content t
 
 > The HEAD method is identical to GET except that the server MUST NOT return a message-body in the response. The metainformation contained in the HTTP headers in response to a HEAD request SHOULD be identical to the information sent in response to a GET request. This method can be used for obtaining metainformation about the entity implied by the request without transferring the entity-body itself. This method is often used for testing hypertext links for validity, accessibility, and recent modification.
 
-To achieve this, `bramus/router` but will internally re-route `HEAD` requests to their equivalent `GET` request and automatically suppress all output.
+To achieve this, `mjoris/router` but will internally re-route `HEAD` requests to their equivalent `GET` request and automatically suppress all output.
 
 
-## Unit Testing & Code Coverage
+## Development: tests, static analysis & coding style
 
-`bramus/router` ships with unit tests using [PHPUnit](https://github.com/sebastianbergmann/phpunit/).
+Install the development dependencies with `composer install`, then:
 
-- If PHPUnit is installed globally run `phpunit` to run the tests.
+| Command            | What it does                                                                  |
+|--------------------|-------------------------------------------------------------------------------|
+| `composer test`    | Runs the unit tests with [PHPUnit](https://phpunit.de)                        |
+| `composer analyse` | Runs [PHPStan](https://phpstan.org) to find bugs without running the code     |
+| `composer lint`    | Checks the coding style ([PER-CS](https://www.php-fig.org/per/coding-style/)) |
+| `composer fix`     | Fixes the coding style                                                        |
 
-- If PHPUnit is not installed globally, install it locally throuh composer by running `composer install --dev`. Run the tests themselves by calling `vendor/bin/phpunit`.
+The tests live in [`tests/RouterTest.php`](tests/RouterTest.php). Each test creates a router, fakes a request (by filling in `$_SERVER`) and checks what the router echoes. GitHub Actions runs all of this on every push, on PHP 8.0 up to 8.5.
 
-  The included `composer.json` will also install `php-code-coverage` which allows one to generate a __Code Coverage Report__. Run `phpunit --coverage-html ./tests-report` (XDebug required), a report will be placed into the `tests-report` subfolder.
+
+## Upgrading from bramus/router
+
+- Require PHP 8.0 or greater.
+- Replace `bramus/router` by `mjoris/router` in your `composer.json`, and `\Bramus\Router\Router` by `\Mjoris\Router\Router` in your code.
+- A `Class@Method` handler whose class or method can't be found now throws an `\Error` instead of doing nothing.
+- A warning is triggered when routes were defined but `run()` was never called.
+- The methods now have type declarations (e.g. `get(string $pattern, callable|string $fn): void`). Passing something that is no callable or string as a handler now throws a `TypeError` immediately.
 
 
 ## Acknowledgements
 
-`bramus/router` is inspired upon [Klein](https://github.com/chriso/klein.php), [Ham](https://github.com/radiosilence/Ham), and [JREAM/route](https://bitbucket.org/JREAM/route) . Whilst Klein provides lots of features it is not object oriented. Whilst Ham is Object Oriented, it's bad at _separation of concerns_ as it also provides templating within the routing class. Whilst JREAM/route is a good starting point it is limited in what it does (only GET routes for example).
+`mjoris/router` is a fork of [bramus/router](https://github.com/bramus/router) by Bram(us) Van Damme.
 
+`bramus/router` is inspired upon [Klein](https://github.com/chriso/klein.php), [Ham](https://github.com/radiosilence/Ham), and [JREAM/route](https://bitbucket.org/JREAM/route) . Whilst Klein provides lots of features it is not object oriented. Whilst Ham is Object Oriented, it's bad at _separation of concerns_ as it also provides templating within the routing class. Whilst JREAM/route is a good starting point it is limited in what it does (only GET routes for example).
 
 
 ## License
 
-`bramus/router` is released under the MIT public license. See the enclosed `LICENSE` for details.
+`mjoris/router` is released under the MIT public license. See the enclosed `LICENSE` for details.

@@ -1,31 +1,51 @@
 {
-    "name": "bramus/router",
-    "description": "A lightweight and simple object oriented PHP Router",
-    "keywords": ["router", "routing"],
-    "homepage": "https://github.com/bramus/router",
+    "name": "mjoris/router",
+    "description": "A lightweight and simple object oriented PHP router, small enough to read and understand. A modernised PHP 8 fork of bramus/router.",
+    "keywords": ["router", "routing", "education"],
+    "homepage": "https://github.com/mjoris/router",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
+            "name": "Joris Maervoet",
+            "homepage": "https://github.com/mjoris"
+        },
+        {
             "name": "Bram(us) Van Damme",
             "email": "bramus@bram.us",
-            "homepage": "http://www.bram.us"
+            "homepage": "https://www.bram.us",
+            "role": "Original author"
         }
     ],
+    "support": {
+        "issues": "https://github.com/mjoris/router/issues",
+        "source": "https://github.com/mjoris/router"
+    },
     "require": {
-        "php": ">=5.3.0"
+        "php": "^8.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "~4.8",
-        "phpunit/php-code-coverage": "~2.0",
-        "friendsofphp/php-cs-fixer": "~2.14"
+        "phpunit/phpunit": "^9.6 || ^10.5 || ^11.5",
+        "phpstan/phpstan": "^2.1",
+        "friendsofphp/php-cs-fixer": "^3.64"
     },
     "autoload": {
-        "psr-0": {"Bramus": "src/"}
+        "psr-4": {
+            "Mjoris\\Router\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Mjoris\\Router\\Tests\\": "tests/"
+        }
     },
     "scripts": {
-        "test": "./vendor/bin/phpunit --colors=always",
-        "lint": "php-cs-fixer fix --diff --dry-run",
+        "test": "phpunit",
+        "analyse": "phpstan analyse",
+        "lint": "php-cs-fixer fix --dry-run --diff",
         "fix": "php-cs-fixer fix"
+    },
+    "config": {
+        "sort-packages": true
     }
 }

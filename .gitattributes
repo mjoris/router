@@ -1,0 +1,10 @@
+# Keep the package that Composer downloads small: only src/, README, CHANGELOG, LICENSE and composer.json
+/.github                 export-ignore
+/demo                    export-ignore
+/demo-multilang          export-ignore
+/tests                   export-ignore
+/.gitattributes          export-ignore
+/.gitignore              export-ignore
+/.php-cs-fixer.dist.php  export-ignore
+/phpstan.neon.dist       export-ignore
+/phpunit.xml.dist        export-ignore
