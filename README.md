@@ -1,6 +1,6 @@
 # mjoris/router
 
-[![CI](https://github.com/mjoris/router/actions/workflows/CI.yml/badge.svg)](https://github.com/mjoris/router/actions) [![Version](https://img.shields.io/packagist/v/mjoris/router.svg?style=flat-square)](https://packagist.org/packages/mjoris/router) [![PHP](https://img.shields.io/packagist/dependency-v/mjoris/router/php.svg?style=flat-square)](https://packagist.org/packages/mjoris/router) [![License](https://img.shields.io/packagist/l/mjoris/router.svg?style=flat-square)](LICENSE)
+[![CI](https://github.com/mjoris/router/actions/workflows/CI.yml/badge.svg)](https://github.com/mjoris/router/actions) [![Version](https://img.shields.io/packagist/v/mjoris/router.svg?style=flat-square)](https://packagist.org/packages/mjoris/router) [![PHP](https://img.shields.io/packagist/dependency-v/mjoris/router/php.svg?style=flat-square)](https://packagist.org/packages/mjoris/router) [![License](https://img.shields.io/github/license/mjoris/router.svg?style=flat-square)](https://github.com/mjoris/router/blob/master/LICENSE)
 
 A lightweight and simple object oriented PHP Router — small enough to read and understand in one sitting.
 
